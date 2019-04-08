@@ -58,8 +58,26 @@ public class AndroidOnionProxyContext extends OnionProxyContext {
                 fileTor = new File(fileNativeDir, this.getTorExecutableFileName());
             }
         }
+        if (fileTor.exists()) {
+            if (fileTor.canExecute())
+                new FileInputStream(fileTor);
+            else {
+                setExecutable(fileTor);
+
+                if (fileTor.canExecute()) {
+                    return new FileInputStream(fileTor);
+                }
+            }
+        }
         Log.i(TAG, "getJNIBinary: ".concat(fileTor.getAbsolutePath()));
         return new FileInputStream(fileTor);
+    }
+
+    private void setExecutable(File fileTor) {
+        fileTor.setReadable(true);
+        fileTor.setExecutable(true);
+        fileTor.setWritable(false);
+        fileTor.setWritable(true, true);
     }
 
     @Override
