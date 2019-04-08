@@ -25,6 +25,7 @@ import static android.content.Context.MODE_PRIVATE;
 
 public class AndroidOnionProxyContext extends OnionProxyContext {
     private final Context context;
+    private static final String TAG = "AndroidOnionProxyContex";
 
     public AndroidOnionProxyContext(Context context, String workingSubDirectoryName) {
         super(context.getDir(workingSubDirectoryName, MODE_PRIVATE));
@@ -42,7 +43,28 @@ public class AndroidOnionProxyContext extends OnionProxyContext {
     }
 
     @Override
+    protected InputStream getJNIBinary(String fileName) throws IOException {
+        File fileNativeDir = new File(getNativeLibraryDir(context));
+        File fileTor = new File(fileNativeDir, "tor.so");
+        if (!fileTor.exists()) {
+            if (getNativeLibraryDir(context).endsWith("arm")) {
+                fileTor = new File(getNativeLibraryDir(context) + "eabi", "tor.so");
+            } else if (getNativeLibraryDir(context).endsWith("arm64")) {
+                fileNativeDir = new File(fileNativeDir.getParentFile(), "armeabi");
+                fileTor = new File(fileNativeDir, "tor.so");
+            }
+        }
+
+        return new FileInputStream(fileTor);
+    }
+
+    @Override
     public String getProcessId() {
         return String.valueOf(android.os.Process.myPid());
+    }
+
+    private static String getNativeLibraryDir(Context context) {
+        ApplicationInfo appInfo = context.getApplicationInfo();
+        return appInfo.nativeLibraryDir;
     }
 }
