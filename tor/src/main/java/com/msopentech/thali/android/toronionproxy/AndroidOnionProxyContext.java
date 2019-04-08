@@ -14,10 +14,14 @@ See the Apache 2 License for the specific language governing permissions and lim
 package com.msopentech.thali.android.toronionproxy;
 
 import android.content.Context;
+import android.content.pm.ApplicationInfo;
+import android.util.Log;
+
 import com.msopentech.thali.toronionproxy.OnionProxyContext;
 import com.msopentech.thali.toronionproxy.WriteObserver;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 
@@ -45,16 +49,16 @@ public class AndroidOnionProxyContext extends OnionProxyContext {
     @Override
     protected InputStream getJNIBinary(String fileName) throws IOException {
         File fileNativeDir = new File(getNativeLibraryDir(context));
-        File fileTor = new File(fileNativeDir, "tor.so");
+        File fileTor = new File(fileNativeDir, this.getTorExecutableFileName());
         if (!fileTor.exists()) {
             if (getNativeLibraryDir(context).endsWith("arm")) {
-                fileTor = new File(getNativeLibraryDir(context) + "eabi", "tor.so");
+                fileTor = new File(getNativeLibraryDir(context) + "eabi", this.getTorExecutableFileName());
             } else if (getNativeLibraryDir(context).endsWith("arm64")) {
                 fileNativeDir = new File(fileNativeDir.getParentFile(), "armeabi");
-                fileTor = new File(fileNativeDir, "tor.so");
+                fileTor = new File(fileNativeDir, this.getTorExecutableFileName());
             }
         }
-
+        Log.i(TAG, "getJNIBinary: ".concat(fileTor.getAbsolutePath()));
         return new FileInputStream(fileTor);
     }
 
